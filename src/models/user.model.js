@@ -18,7 +18,7 @@ const userSchema = new Schema({ //userSchema it define we are creating a new sch
         lowercase:true,
         trim:true,
     },
-    fullname:{
+    fullName:{
         type:String,
         required:true,
         trim:true,
@@ -55,7 +55,40 @@ const userSchema = new Schema({ //userSchema it define we are creating a new sch
 userSchema.pre("save",async function(next){ //jab save hoga tab ye function chalega.//pre is a mongoose middleware that runs before saving a document.//function keyword is used to access 'this' keyword which points to the current document being saved.
 if (!thish.isModiified("password") ) return next() //if password is not modified then next()
 this.password=bcrypt.hash(this.password,10)//if password is modified then hash it with bcrypt
-next()//hashing the password before saving
+next()//we use next() to proceed to the next middleware or to complete the save operation.
+//hashing the password before saving
 })
+
+
+userSchema.methods.isPasswordCorrect=async function (password){
+    return await bcrypt.compare(password, this.password)
+
+}
+userSchema.methods.generateAccessToken = function(){
+    return jwt.sign(
+        {
+            _id: this._id,
+            email: this.email,
+            username: this.username,
+            fullName: this.fullName
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+        }
+    )
+}
+userSchema.methods.generateRefreshToken = function(){
+    return jwt.sign(
+        {
+            _id: this._id,
+            
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+        }
+    )
+}
 
 export const User=mongoose.model("User",userSchema);//We are creating a model named User using the userSchema defined above.
