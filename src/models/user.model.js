@@ -64,8 +64,9 @@ userSchema.methods.isPasswordCorrect=async function (password){
     return await bcrypt.compare(password, this.password)
 
 }
+//method to generate access token and refresh token
 userSchema.methods.generateAccessToken = function(){
-    return jwt.sign(
+    return jwt.sign( //sign method is used to create a new JWT token which takes three arguments: payload, secret key, and options.
         {
             _id: this._id,
             email: this.email,
